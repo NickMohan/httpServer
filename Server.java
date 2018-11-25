@@ -6,6 +6,7 @@ public class Server{
 	static final File ROOT = new File(".");
 	static final int PORT = 8080; 
 	static final String DEFAULT_FILE = "index.html";
+	static final String FILE_404 = "404.html";
 
 	/*
 	Another error is that client goes throught and reconnects or something and the 
@@ -23,7 +24,9 @@ public class Server{
 		System.out.println("Server running on IP and Port: " + serverSock.toString());
 
 		while(true){
-			httpserver(serverSock.accept());	
+			Socket client = serverSock.accept();
+			httpserver(client);
+			client.close();	
 		}
 		//serverSock.close();
 	}
@@ -42,8 +45,11 @@ public class Server{
 			String httpRequestType = null;
 			System.out.println("Finish I/O Connections");
 
+			//THIS IS IMPORTANT BECAUSE IT BREAKS THE CLIENt CONNECTION SOMETIMES
 			//Seems like client connects goes through then goes through again and hangs here
 			//idk why need to figure that out 
+			//I think it is something with the favicon request but I am not too sure because it does not
+			//hang when making requests with curl
 
 			String requestLine = in.readLine();
 			System.out.println("Request Line: "+ requestLine);
@@ -71,7 +77,7 @@ public class Server{
 				String fileType = getContentType(fileRequested);
 
 				System.out.println(fileLength+"\t"+fileType);
-					
+
 				byte[] fileData = fileDataToBytes(file,fileLength);
 
 				//for(byte x : fileData){System.out.print(x+" ");}
@@ -80,17 +86,26 @@ public class Server{
 				out.println("Server: TEST");
 				out.println("Date: "+new Date());
 				out.println("Content-type:" + fileType);
-				out.println("Content-length"+fileLength);
-				out.println();
+				out.println("Content-length: "+fileLength);
+				out.print("\r\n\r\n");
+				//out.println();
 				out.flush();
 
 				fileOut.write(fileData,0,fileLength);
 				fileOut.flush();
 				System.out.println("GET Request Returned");
 			}
+
+
+
 		}	
-		//catch(IOException x){System.err.println("IOException: " + x);}
-		//catch(NullPointerException y){System.out.println("NullPointerException: "+y);}
+		catch(FileNotFoundException z){
+			System.out.println("File Not Found Exception: "+z); 
+			try{fileNotFound(out,fileOut);}
+			catch(IOException a){}
+		}
+		catch(IOException x){System.out.println("IOException: " + x);}
+		catch(NullPointerException y){System.out.println("NullPointerException: "+y);}
 		catch(Exception e){System.out.println("Exception: "+ e);}
 		finally{
 			try{
@@ -113,6 +128,9 @@ public class Server{
 		if(fileRequested.endsWith(".html") || fileRequested.endsWith(".htm")){
 			return "text/html";
 		}
+		else if(fileRequested.endsWith(".ico")){
+			return "image/x-icon";
+		}
 		else{
 			return "text/plain"; 
 		}
@@ -134,6 +152,32 @@ public class Server{
 			}
 		}
 		return data;
+	}
+
+	//Sends back a 404 if a file not found exception is thrown
+	private static void fileNotFound(PrintWriter out, BufferedOutputStream fileOut)throws IOException{
+		File file = new File(ROOT,FILE_404);
+		int fileLength = (int) file.length();
+		String fileType = getContentType(FILE_404);
+
+		System.out.println(fileLength+"\t"+fileType);
+
+		byte[] fileData = fileDataToBytes(file,fileLength);
+
+		//for(byte x : fileData){System.out.print(x+" ");}
+
+		out.println("HTTP/1.1 404 File Not Found");
+		out.println("Server: TEST");
+		out.println("Date: "+new Date());
+		out.println("Content-type:" + fileType);
+		out.println("Content-length: "+fileLength);
+		out.print("\r\n\r\n");
+		//out.println();
+		out.flush();
+
+		fileOut.write(fileData,0,fileLength);
+		fileOut.flush();
+		System.out.println("404 Returned");
 	}
 
 }
