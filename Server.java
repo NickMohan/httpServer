@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.org.json.simple.*;
+//import java.org.json.simple.*;
 
 public class Server{
 	static final File ROOT = new File(".");
@@ -181,8 +181,11 @@ public class Server{
 		fileOut.flush();
 		System.out.println("404 Returned");
 	}
+
+	//This is probably gonna to be changed to a scanner class because I am just trying to use STL things
+
 	//This parses the JSON file then can be used to find corrent MIME Types
-	private static void findMIMEfromJSON(String fileExtension){
+	/*private static void findMIMEfromJSON(String fileExtension){
 		JSONParser parser = new JSONParser();
 
 		JSONArray json = (JSONArray) parse(new FileReader("/mimetypes.json"));
@@ -193,7 +196,7 @@ public class Server{
 		String mimetype = (String) types.get(fileExtension);
 
 		return mimetype;
-	}
+	}*/
 
 }
 
