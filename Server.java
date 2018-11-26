@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.org.json.simple.*;
 
 public class Server{
 	static final File ROOT = new File(".");
@@ -125,6 +126,8 @@ public class Server{
 
 	//This should support more MIME types in the future
 	private static String getContentType(String fileRequested){
+		//Need to change this to split at the . and then get everything afterwards
+		//then need to call the function that returns mime types from the JSON
 		if(fileRequested.endsWith(".html") || fileRequested.endsWith(".htm")){
 			return "text/html";
 		}
@@ -138,7 +141,7 @@ public class Server{
 	//String fileType = fileRequested.split("\\.",0);
 	//return "text/"+fileType
 
-	//I dont really know how the file input stream works but this 
+	//I dont really know how the file input stream works but this works
 	private static byte[] fileDataToBytes(File file, int length) throws IOException{
 		FileInputStream fileBytes = null;
 		byte[] data = new byte[length];
@@ -164,7 +167,6 @@ public class Server{
 
 		byte[] fileData = fileDataToBytes(file,fileLength);
 
-		//for(byte x : fileData){System.out.print(x+" ");}
 
 		out.println("HTTP/1.1 404 File Not Found");
 		out.println("Server: TEST");
@@ -178,6 +180,19 @@ public class Server{
 		fileOut.write(fileData,0,fileLength);
 		fileOut.flush();
 		System.out.println("404 Returned");
+	}
+	//This parses the JSON file then can be used to find corrent MIME Types
+	private static void findMIMEfromJSON(String fileExtension){
+		JSONParser parser = new JSONParser();
+
+		JSONArray json = (JSONArray) parse(new FileReader("/mimetypes.json"));
+		JSONObject types = (JSONObject) json[0];
+
+		//Add a catch here if type not found to add a default type to send
+
+		String mimetype = (String) types.get(fileExtension);
+
+		return mimetype;
 	}
 
 }
