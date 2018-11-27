@@ -2,11 +2,24 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+//---------------------------
+//			TODO
+//---------------------------
+//Logging
+//POST
+//HEAD
+//Better MIME Types
+//Read more into header(keep alive, cookies?)
+//Compression?(GZIP)
+//SSL?
+//Authentication?(User and Password)?
+//Other Things?
+
 
 public class HttpServer implements Runnable{
 	static final String DEFAULT_FILE = "index.html";
 	static final String FILE_404 = "404.html";
-	static final File ROOT = new File(".");
+	static final File ROOT = new File("pq-doc");
 
 	private Socket client;
 
@@ -102,15 +115,11 @@ public class HttpServer implements Runnable{
 		}
 	}
 
-/*	private static String inputStreamToString(InputStream in){
-		Scanner scan = new Scanner(in).useDelimiter("\\A");
-		return scan.hasNext() ? scan.next() : "";
-	}*/
-
 	//This should support more MIME types in the future
 	private static String getContentType(String fileRequested){
 		//Need to change this to split at the . and then get everything afterwards
-		//then need to call the function that returns mime types from the JSON
+		//then need to call the function that returns mime types from a scanner text file
+
 		if(fileRequested.endsWith(".html") || fileRequested.endsWith(".htm")){
 			return "text/html";
 		}
