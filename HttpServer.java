@@ -5,10 +5,11 @@ import java.util.*;
 //---------------------------
 //			TODO
 //---------------------------
-//Logging
-//POST
-//HEAD
-//Better MIME Types
+//Logging 				[]
+//POST					[]
+//HEAD 					[X]							
+//Better MIME Types 	[]
+//Keep-Alive Header     []
 //Read more into header(keep alive, cookies?)
 //Compression?(GZIP)
 //SSL?
@@ -19,7 +20,7 @@ import java.util.*;
 public class HttpServer implements Runnable{
 	static final String DEFAULT_FILE = "index.html";
 	static final String FILE_404 = "404.html";
-	static final File ROOT = new File(".");
+	static final File ROOT = new File("root");
 
 	private Socket client;
 
@@ -96,7 +97,24 @@ public class HttpServer implements Runnable{
 				else{ System.out.println("HEAD Request Returned"); }
 			}
 
+			//Have to extract data from the body of the request then send it to the script then return contents
+			// script = fileRequested
+			// content type is important and needs to be parsed out to read what is in the body
+			//
 			else if(httpRequestType.equals("POST")){
+				String scriptPath = fileRequested;
+				String contentType;
+				String requestBodyData;
+
+
+				while(requestLineTokenizer.hasMoreTokens()){
+					String temp = requestLineTokenizer.nextToken();
+					if(temp.startsWith("Content-Type:")){
+						contentType = requestLineTokenizer.nextToken();
+					}
+					//gotta split here when blank line before request body
+				}
+				//get the rest of the request body into a string for analyzing
 
 			}
 
