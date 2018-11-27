@@ -19,7 +19,7 @@ import java.util.*;
 public class HttpServer implements Runnable{
 	static final String DEFAULT_FILE = "index.html";
 	static final String FILE_404 = "404.html";
-	static final File ROOT = new File("pq-doc");
+	static final File ROOT = new File(".");
 
 	private Socket client;
 
@@ -61,7 +61,7 @@ public class HttpServer implements Runnable{
 			//Also need to add file not found so if index.html isnt there or something else 
 			//and a 404 page or something or error page idk needs something 
 
-			if(httpRequestType.equals("GET")){
+			if(httpRequestType.equals("GET") || httpRequestType.equals("HEAD")){
 
 				if(fileRequested.endsWith("/")){
 					fileRequested += DEFAULT_FILE;
@@ -88,12 +88,30 @@ public class HttpServer implements Runnable{
 				//out.println();
 				out.flush();
 
-				fileOut.write(fileData,0,fileLength);
-				fileOut.flush();
-				System.out.println("GET Request Returned");
+				if(httpRequestType.equals("GET")){
+					fileOut.write(fileData,0,fileLength);
+					fileOut.flush();
+					System.out.println("GET Request Returned");
+				}
+				else{ System.out.println("HEAD Request Returned"); }
 			}
 
+			else if(httpRequestType.equals("POST")){
 
+			}
+
+			else if(httpRequestType.equals("OPTIONS")){
+				System.out.println("OPTIONS Request recieved");
+				out.println("HTTP/1.1 200 OK");
+				out.println("Allow: GET, HEAD, OPTIONS");
+				out.println("Server: TEST");
+				out.println("Date: "+new Date());
+				out.println("Content-length: 0");
+				out.print("\r\n\r\n");
+				//out.println();
+				out.flush();
+				System.out.println("OPTIONS Request Returned");
+			}
 
 		}	
 		catch(FileNotFoundException z){
