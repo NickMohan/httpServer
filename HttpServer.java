@@ -1,48 +1,20 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
-public class Server{
-	//static final File ROOT = new File(".");
-	static final int PORT = 8080; 
-	//static final String DEFAULT_FILE = "index.html";
-	//static final String FILE_404 = "404.html";
 
-	/*
-	Another error is that client goes throught and reconnects or something and the 
-	program hangs trying to request a favicon or something after the I/O connections 
-	I honestly have no clue why need to figure it out. Put a note in the code where 
-	this hang occurs 
-	
-	
-	Need to add multithreading up here because multithreading is cool
-	Also should add a logger
-	*/
+public class HttpServer implements Runnable{
+	static final String DEFAULT_FILE = "index.html";
+	static final String FILE_404 = "404.html";
+	static final File ROOT = new File(".");
 
-	public static void main(String[] args) throws IOException{
-		ServerSocket serverSock = new ServerSocket(PORT);
-		System.out.println("Server running on IP and Port: " + serverSock.toString());
+	private Socket client;
 
-		Executor service = Executors.newCachedThreadPool();
-
-		while(true){
-			try{
-				Socket client = serverSock.accept();
-				service.execute(new HttpServer(client));
-			}
-			catch(SocketTimeoutException x){
-				System.out.println("Socket timed out: "+x);
-			}
-
-			//Socket client = serverSock.accept();
-			//httpserver(client);
-			//client.close();	
-		}
-		//serverSock.close();
+	public HttpServer(Socket cl){
+		client = cl;
 	}
-/*
+
+
 	public static void httpserver(Socket connect){
 		System.out.println("Connected to Client: "+connect.toString());
 		BufferedReader in = null;
@@ -128,7 +100,7 @@ public class Server{
 			}
 			catch(IOException x){System.out.println("IOException: "+x);}
 		}
-	}*/
+	}
 
 /*	private static String inputStreamToString(InputStream in){
 		Scanner scan = new Scanner(in).useDelimiter("\\A");
@@ -136,7 +108,7 @@ public class Server{
 	}*/
 
 	//This should support more MIME types in the future
-	/*private static String getContentType(String fileRequested){
+	private static String getContentType(String fileRequested){
 		//Need to change this to split at the . and then get everything afterwards
 		//then need to call the function that returns mime types from the JSON
 		if(fileRequested.endsWith(".html") || fileRequested.endsWith(".htm")){
@@ -144,6 +116,12 @@ public class Server{
 		}
 		else if(fileRequested.endsWith(".ico")){
 			return "image/x-icon";
+		}
+		else if(fileRequested.endsWith(".js")){
+			return "application/javascript";
+		}
+		else if(fileRequested.endsWith(".css")){
+			return "text/css";
 		}
 		else{
 			return "text/plain"; 
@@ -193,21 +171,9 @@ public class Server{
 		System.out.println("404 Returned");
 	}
 
-	//This is probably gonna to be changed to a scanner class because I am just trying to use STL things
+	public void run(){
+		httpserver(client);
+	}
 
-	//This parses the JSON file then can be used to find corrent MIME Types
-	/*private static void findMIMEfromJSON(String fileExtension){
-		JSONParser parser = new JSONParser();
-
-		JSONArray json = (JSONArray) parse(new FileReader("/mimetypes.json"));
-		JSONObject types = (JSONObject) json[0];
-
-		//Add a catch here if type not found to add a default type to send
-
-		String mimetype = (String) types.get(fileExtension);
-
-		return mimetype;
-	}*/
 
 }
-
