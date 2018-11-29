@@ -10,6 +10,7 @@ import java.util.*;
 //HEAD 					[X]							
 //Better MIME Types 	[]
 //Keep-Alive Header     []
+//
 //Read more into header(keep alive, cookies?)
 //Compression?(GZIP)
 //SSL?
@@ -43,11 +44,12 @@ public class HttpServer implements Runnable{
 			String httpRequestType = null;
 			System.out.println("Finish I/O Connections");
 
-			//THIS IS IMPORTANT BECAUSE IT BREAKS THE CLIENt CONNECTION SOMETIMES
-			//Seems like client connects goes through then goes through again and hangs here
-			//idk why need to figure that out 
-			//I think it is something with the favicon request but I am not too sure because it does not
-			//hang when making requests with curl
+			//Was hanging here idk if still does havent really done anything with it
+
+			//Adding more header parsing up here for cookies and other things like 
+			//keep alive and such idk that just seems like a lot of work at the moment
+
+
 
 			String requestLine = in.readLine();
 			System.out.println("Request Line: "+ requestLine);
@@ -102,24 +104,56 @@ public class HttpServer implements Runnable{
 			// content type is important and needs to be parsed out to read what is in the body
 			//
 			else if(httpRequestType.equals("POST")){
+				StringTokenizer postParser;
 				String scriptPath = fileRequested;
-				String contentType;
+				String contentType = "";
 				String requestBodyData;
+				String temp = "";
+				int contentLength = -1;
+				
 
-
-				while(requestLineTokenizer.hasMoreTokens()){
-					String temp = requestLineTokenizer.nextToken();
+				while(contentType == "" || contentLength == -1){
+					temp = in.readLine();
 					if(temp.startsWith("Content-Type:")){
-						contentType = requestLineTokenizer.nextToken();
+ 						postParser = new StringTokenizer(temp);
+ 						postParser.nextToken();
+						contentType = postParser.nextToken();
+					}
+					if(temp.startsWith("Content-Length:")){
+						postParser = new StringTokenizer(temp);
+ 						postParser.nextToken();
+						contentLength = Integer.parseInt(postParser.nextToken());
 					}
 					//gotta split here when blank line before request body
+					//Have to parse out the request body here and I do not know how to do that
 				}
-				//get the rest of the request body into a string for analyzing
+				//This should send the request body to the script for processing and the return the response
+				//to the client
+
+
+				out.println("HTTP/1.1 200 OK");
+				out.println("Server: TEST");
+				out.println("Date: "+new Date());
+				out.println("Content-length: "); 		//FILL OUT
+				out.println("Content-Type: "); 			//FILL OUT
+				out.print("\r\n\r\n");
+				//out.println();
+				out.flush();
+
+				//This should return the response in the body for the POST request
+				
+				//fileOut.write(fileData,0,fileLength);
+				//fileOut.flush();
+				//out.flush();
+
+				System.out.println("POST Request Returned");
+
 
 			}
 
 			else if(httpRequestType.equals("OPTIONS")){
 				System.out.println("OPTIONS Request recieved");
+				
 				out.println("HTTP/1.1 200 OK");
 				out.println("Allow: GET, HEAD, OPTIONS");
 				out.println("Server: TEST");
