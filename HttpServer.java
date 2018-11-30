@@ -1,11 +1,12 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.*;
 
 //---------------------------
 //			TODO
 //---------------------------
-//Logging 				[]
+//Logging 				[X]
 //POST					[]
 //HEAD 					[X]							
 //Better MIME Types 	[]
@@ -24,14 +25,18 @@ public class HttpServer implements Runnable{
 	static final File ROOT = new File("root");
 
 	private Socket client;
+	private static Logger actLog;
+	private static Logger errLog;
 
-	public HttpServer(Socket cl){
+	public HttpServer(Socket cl, Logger act, Logger err){
 		client = cl;
+		actLog = act;
+		errLog = err;
 	}
 
 
 	public static void httpserver(Socket connect){
-		System.out.println("Connected to Client: "+connect.toString());
+		actLog.finer("Connected to Client: "+connect.toString());
 		BufferedReader in = null;
 		PrintWriter out = null;
 		BufferedOutputStream fileOut = null;
@@ -42,7 +47,7 @@ public class HttpServer implements Runnable{
 			fileOut = new BufferedOutputStream(connect.getOutputStream());
 			String fileRequested = null;
 			String httpRequestType = null;
-			System.out.println("Finish I/O Connections");
+			actLog.finer("Finish I/O Connections");
 
 			//Was hanging here idk if still does havent really done anything with it
 
@@ -57,7 +62,7 @@ public class HttpServer implements Runnable{
 
 			httpRequestType = requestLineTokenizer.nextToken().toUpperCase();
 			fileRequested = requestLineTokenizer.nextToken().toLowerCase();
-			System.out.println("Request Parsed");
+			actLog.finer("Request Parsed");
 
 			//Also need to add HEAD and POST and any other methods we want
 			//Also methods not found would work too(I think this is trace)
@@ -70,7 +75,7 @@ public class HttpServer implements Runnable{
 					fileRequested += DEFAULT_FILE;
 				}
 
-				System.out.println("File Requested Path:" + fileRequested);
+				actLog.finer("File Requested Path:" + fileRequested);
 
 				File file = new File(ROOT, fileRequested);
 				int fileLength = (int) file.length();
@@ -94,9 +99,9 @@ public class HttpServer implements Runnable{
 				if(httpRequestType.equals("GET")){
 					fileOut.write(fileData,0,fileLength);
 					fileOut.flush();
-					System.out.println("GET Request Returned");
+					actLog.finer("GET Request Returned");
 				}
-				else{ System.out.println("HEAD Request Returned"); }
+				else{ actLog.finer("HEAD Request Returned"); }
 			}
 
 			//Have to extract data from the body of the request then send it to the script then return contents
@@ -146,13 +151,13 @@ public class HttpServer implements Runnable{
 				//fileOut.flush();
 				//out.flush();
 
-				System.out.println("POST Request Returned");
+				actLog.finer("POST Request Returned");
 
 
 			}
 
 			else if(httpRequestType.equals("OPTIONS")){
-				System.out.println("OPTIONS Request recieved");
+				actLog.finer("OPTIONS Request recieved");
 				
 				out.println("HTTP/1.1 200 OK");
 				out.println("Allow: GET, HEAD, OPTIONS");
@@ -162,18 +167,18 @@ public class HttpServer implements Runnable{
 				out.print("\r\n\r\n");
 				//out.println();
 				out.flush();
-				System.out.println("OPTIONS Request Returned");
+				actLog.finer("OPTIONS Request Returned");
 			}
 
 		}	
 		catch(FileNotFoundException z){
-			System.out.println("File Not Found Exception: "+z); 
+			errLog.finer("File Not Found Exception: "+z); 
 			try{fileNotFound(out,fileOut);}
 			catch(IOException a){}
 		}
-		catch(IOException x){System.out.println("IOException: " + x);}
-		catch(NullPointerException y){System.out.println("NullPointerException: "+y);}
-		catch(Exception e){System.out.println("Exception: "+ e);}
+		catch(IOException x){errLog.finer("IOException: " + x);}
+		catch(NullPointerException y){errLog.finer("NullPointerException: "+y);}
+		catch(Exception e){errLog.finer("Exception: "+ e);}
 		finally{
 			try{
 				in.close();
@@ -181,7 +186,7 @@ public class HttpServer implements Runnable{
 				fileOut.close();
 				connect.close();
 			}
-			catch(IOException x){System.out.println("IOException: "+x);}
+			catch(IOException x){errLog.finer("IOException: "+x);}
 		}
 	}
 
@@ -247,7 +252,7 @@ public class HttpServer implements Runnable{
 
 		fileOut.write(fileData,0,fileLength);
 		fileOut.flush();
-		System.out.println("404 Returned");
+		actLog.finer("404 Returned");
 	}
 
 	public void run(){
