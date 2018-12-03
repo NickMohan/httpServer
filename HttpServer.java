@@ -22,7 +22,7 @@ import java.util.logging.*;
 public class HttpServer implements Runnable{
 	static final String DEFAULT_FILE = "index.html";
 	static final String FILE_404 = "404.html";
-	static final File ROOT = new File("root");
+	static final File ROOT = new File("root/");
 
 	private Socket client;
 	private static Logger actLog;
