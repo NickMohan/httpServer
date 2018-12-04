@@ -22,7 +22,7 @@ import java.util.logging.*;
 public class HttpServer implements Runnable{
 	static final String DEFAULT_FILE = "index.html";
 	static final String FILE_404 = "404.html";
-	static final File ROOT = new File("root/");
+	static final File ROOT = new File("root/test");
 
 	private Socket client;
 	private static Logger actLog;
@@ -49,8 +49,6 @@ public class HttpServer implements Runnable{
 			String httpRequestType = null;
 			actLog.finer("Finish I/O Connections");
 
-			//Was hanging here idk if still does havent really done anything with it
-
 			//Adding more header parsing up here for cookies and other things like 
 			//keep alive and such idk that just seems like a lot of work at the moment
 
@@ -59,6 +57,9 @@ public class HttpServer implements Runnable{
 			String requestLine = in.readLine();
 			System.out.println("Request Line: "+ requestLine);
 			StringTokenizer requestLineTokenizer = new StringTokenizer(requestLine);
+
+			//I think if add keep alive header parse and add a keep alive this may actually work for POST idk
+			//Got to try it out but chrome is giving a connection reset error and i think it may actually fix it
 
 			httpRequestType = requestLineTokenizer.nextToken().toUpperCase();
 			fileRequested = requestLineTokenizer.nextToken().toLowerCase();
@@ -129,13 +130,16 @@ public class HttpServer implements Runnable{
  						postParser.nextToken();
 						contentLength = Integer.parseInt(postParser.nextToken());
 					}
-					//gotta split here when blank line before request body
-					//Have to parse out the request body here and I do not know how to do that
+					//So I am pretty sure if i add the keep alive thing it should work or at least solve some of the problem
+					//So i need to do that.
+
+
 				}
+
 				//This should send the request body to the script for processing and the return the response
 				//to the client
 
-
+				/*
 				out.println("HTTP/1.1 200 OK");
 				out.println("Server: TEST");
 				out.println("Date: "+new Date());
@@ -150,6 +154,33 @@ public class HttpServer implements Runnable{
 				//fileOut.write(fileData,0,fileLength);
 				//fileOut.flush();
 				//out.flush();
+				*/
+
+				if(fileRequested.endsWith("/")){
+					fileRequested += DEFAULT_FILE;
+				}	
+				
+				File file = new File(ROOT, fileRequested);
+				int fileLength = (int) file.length();
+				String fileType = getContentType(fileRequested);
+
+				System.out.println(fileLength+"\t"+fileType);
+
+				byte[] fileData = fileDataToBytes(file,fileLength);
+
+				//for(byte x : fileData){System.out.print(x+" ");}
+
+				out.println("HTTP/1.1 200 OK");
+				out.println("Server: TEST");
+				out.println("Date: "+new Date());
+				out.println("Content-type:" + fileType);
+				out.println("Content-length: "+fileLength);
+				out.print("\r\n\r\n");
+				//out.println();
+				out.flush();
+
+				fileOut.write(fileData,0,fileLength);
+				fileOut.flush();
 
 				actLog.finer("POST Request Returned");
 
@@ -206,6 +237,9 @@ public class HttpServer implements Runnable{
 		}
 		else if(fileRequested.endsWith(".css")){
 			return "text/css";
+		}
+		else if(fileRequested.endsWith(".php")){
+			return "application/x-php";
 		}
 		else{
 			return "text/plain"; 
