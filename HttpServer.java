@@ -9,8 +9,9 @@ import java.util.logging.*;
 //Logging 				[X]
 //POST					[]
 //HEAD 					[X]							
-//Better MIME Types 	[]
-//Keep-Alive Header     []
+//Better MIME Types 			[]
+//Keep-Alive Header    		        []
+//Add Timeout for Files that dont show  []
 //
 //Read more into header(keep alive, cookies?)
 //Compression?(GZIP)
@@ -22,7 +23,7 @@ import java.util.logging.*;
 public class HttpServer implements Runnable{
 	static final String DEFAULT_FILE = "index.html";
 	static final String FILE_404 = "404.html";
-	static final File ROOT = new File("root/test/");
+	static final File ROOT = new File("root/pq-doc/");
 
 	private Socket client;
 	private static Logger actLog;
@@ -95,8 +96,6 @@ public class HttpServer implements Runnable{
 
 			connection = (connectKeepAlive.equalsIgnoreCase("Keep-Alive")) ? true : false;
 
-
-
 			if(httpRequestType.equalsIgnoreCase("GET") || httpRequestType.equalsIgnoreCase("HEAD")){
 
 				if(fileRequested.endsWith("/")){
@@ -130,27 +129,18 @@ public class HttpServer implements Runnable{
 				else{ actLog.finer("HEAD Request Returned"); }
 			}
 
-			//This fucking bitch wont work I swear to god I will swing 
 			else if(httpRequestType.equalsIgnoreCase("POST")){
 				StringTokenizer postParser;
 				String scriptPath = fileRequested;
 
-				System.out.println(fileRequested);
-
 				//Gets the request body into a string
 				StringBuilder body = new StringBuilder(contentLength);
-				System.out.println("TEST:  "+in.readLine());
-				System.out.println("TEST:  "+in.readLine());
-				System.out.println("TEST:  "+in.readLine());
-				System.out.println("TEST:  "+in.readLine());
-				System.out.println("TEST:  "+in.readLine());
-				System.out.println("TEST:  "+in.readLine());
 				for(int i = 0; i< contentLength; i++){
 					char c = (char) in.read();
 					body.append((char) c);
 				}
 
-				//System.out.println(body.toString());
+				System.out.println("Body:  "+body.toString());
 
 				//We only except multipart form data and send bad request to not that
 				if(!contentType.equalsIgnoreCase("multipart/form-data;")){
@@ -159,54 +149,11 @@ public class HttpServer implements Runnable{
 				else{
 
 					//Script should run here and response here should be formulated
+					//All done right here
 
 				}
 
-				//This should send the request body to the script for processing and the return the response
-				//to the client
-
-				/*
-				out.println("HTTP/1.1 200 OK");
-				out.println("Server: TEST");
-				out.println("Date: "+new Date());
-				out.println("Content-length: "); 		//FILL OUT
-				out.println("Content-Type: "); 			//FILL OUT
-				out.print("\r\n\r\n");
-				//out.println();
-				out.flush();
-
-				//This should return the response in the body for the POST request
-				
-				//fileOut.write(fileData,0,fileLength);
-				//fileOut.flush();
-				//out.flush();
-				*/
-
-//				if(fileRequested.endsWith("/")){
-//					fileRequested += DEFAULT_FILE;
-//				}	
-				
-//				File file = new File(ROOT, fileRequested);
-//				int fileLength = (int) file.length();
-//				String fileType = getContentType(fileRequested);
-
-//				System.out.println(fileLength+"\t"+fileType);
-
-//				byte[] fileData = fileDataToBytes(file,fileLength);
-
-				//for(byte x : fileData){System.out.print(x+" ");}
-
-				//out.println("HTTP/1.1 200 OK");
-				//out.println("Server: TEST");
-				//out.println("Date: "+new Date());
-//				out.println("Content-type:" + fileType);
-//				out.println("Content-length: "+fileLength);
-				//out.print("\r\n\r\n");
-				//out.println();
-				//out.flush();
-
-				//fileOut.write(fileData,0,fileLength);
-				//fileOut.flush();
+				//Old stuff commented out is at the bottom of the page
 
 				actLog.finer("POST Request Returned");
 
@@ -237,16 +184,16 @@ public class HttpServer implements Runnable{
 		catch(Exception e){errLog.finer("Exception: "+ e);}
 		finally{
 			try{
-				if(!connection){
+			//	if(!connection){
 					in.close();
 					out.close();
 					fileOut.close();
 					connect.close();
 					System.out.println("Closed Connections");
-				}
-				else{
-					System.out.println("Connections left open");
-				}
+			//	}
+			//	else{
+			//		System.out.println("Connections left open");
+			//	}
 			}
 			catch(IOException x){errLog.finer("IOException: "+x);}
 		}
@@ -326,3 +273,54 @@ public class HttpServer implements Runnable{
 
 
 }
+
+
+
+
+				//This should send the request body to the script for processing and the return the response
+				//to the client
+
+				/*
+				out.println("HTTP/1.1 200 OK");
+				out.println("Server: TEST");
+				out.println("Date: "+new Date());
+				out.println("Content-length: "); 		//FILL OUT
+				out.println("Content-Type: "); 			//FILL OUT
+				out.print("\r\n\r\n");
+				//out.println();
+				out.flush();
+
+				//This should return the response in the body for the POST request
+				
+				//fileOut.write(fileData,0,fileLength);
+				//fileOut.flush();
+				//out.flush();
+				*/
+
+//				if(fileRequested.endsWith("/")){
+//					fileRequested += DEFAULT_FILE;
+//				}	
+				
+//				File file = new File(ROOT, fileRequested);
+//				int fileLength = (int) file.length();
+//				String fileType = getContentType(fileRequested);
+
+//				System.out.println(fileLength+"\t"+fileType);
+
+//				byte[] fileData = fileDataToBytes(file,fileLength);
+
+				//for(byte x : fileData){System.out.print(x+" ");}
+
+				//out.println("HTTP/1.1 200 OK");
+				//out.println("Server: TEST");
+				//out.println("Date: "+new Date());
+//				out.println("Content-type:" + fileType);
+//				out.println("Content-length: "+fileLength);
+				//out.print("\r\n\r\n");
+				//out.println();
+				//out.flush();
+
+				//fileOut.write(fileData,0,fileLength);
+				//fileOut.flush();
+
+
