@@ -6,19 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.*;
 
 public class Server{
-	//static final File ROOT = new File(".");
 	static final int PORT = 8080; 
-	//static final String DEFAULT_FILE = "index.html";
-	//static final String FILE_404 = "404.html";
-
-	/*
-	Another error is that client goes throught and reconnects or something and the 
-	program hangs trying to request a favicon or something after the I/O connections 
-	I honestly have no clue why need to figure it out. Put a note in the code where 
-	this hang occurs 
-	
-	Also should add a logger
-	*/
 
 	public static void main(String[] args) throws IOException{
 		//Set up the loggers
@@ -33,10 +21,11 @@ public class Server{
 		act.setLevel(Level.FINER);
 		err.setLevel(Level.FINER);
 
+		//Join loggers and handler
 		actLog.addHandler(act);
 		errLog.addHandler(err);
 
-
+		//Create a new server socket
 		ServerSocket serverSock = new ServerSocket(PORT);
 		actLog.finer("Server running on IP and Port: " + serverSock.toString());
 
@@ -45,6 +34,7 @@ public class Server{
 		while(true){
 			try{
 				Socket client = serverSock.accept();
+				client.setSoTimeout(10000);
 				HttpServer temp = new HttpServer(client,actLog,errLog);
 				service.execute(temp);
 			}

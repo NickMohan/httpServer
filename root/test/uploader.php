@@ -6,7 +6,7 @@
 //This will need to get info about what folder inside files to upload this too
 //Probably come from what directory the person is currently looking at on server(IDK)
 //When I change this it aint working chief so gotta deal with that
-$rootFolderPath ="/var/www/html/files/";
+$rootFolderPath ="~/Documents/github/httpServer/root/test/files/";
 
 $filePath = $rootFolderPath . basename($_FILES['file']['name']);
 $fileSize = $_FILES['file']['size'];
