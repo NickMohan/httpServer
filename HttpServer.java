@@ -23,7 +23,7 @@ import java.util.logging.*;
 public class HttpServer implements Runnable{
 	static final String DEFAULT_FILE = "index.html";
 	static final String FILE_404 = "404.html";
-	static final File ROOT = new File("root/pq-doc/");
+	static final File ROOT = new File("root/test/");
 
 	private Socket client;
 	private static Logger actLog;
@@ -139,17 +139,26 @@ public class HttpServer implements Runnable{
 					char c = (char) in.read();
 					body.append((char) c);
 				}
-
+				
+				
+				System.out.println("Content Type:  "+contentType);
+				System.out.println("Content Length:  "+contentLength);
 				System.out.println("Body:  "+body.toString());
 
 				//We only except multipart form data and send bad request to not that
-				if(!contentType.equalsIgnoreCase("multipart/form-data;")){
+				if(!contentType.equalsIgnoreCase("multipart/form-data;") && !contentType.equalsIgnoreCase("application/x-www-form-urlencoded")){
 					fileNotFound(out,fileOut);	
 				}
 				else{
+				//Things have to go here. What i a totoally not sure but some kind of response is probably a good idea	
 
-					//Script should run here and response here should be formulated
-					//All done right here
+				out.println("HTTP/1.1 200 OK");
+				out.println("Server: TEST");
+				out.println("Date: "+new Date());
+				out.println("Content-length: 0");
+				out.print("\r\n\r\n");
+				//out.println();
+				out.flush();
 
 				}
 
