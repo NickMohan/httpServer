@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.*;
 import javax.net.ssl.*;
 import javax.net.*;
+import java.security.cert.*;
 
 public class Server{
 	static final int PORT = 8080; 
@@ -32,19 +33,52 @@ public class Server{
 		//TrustManager[] tm = {new MyX509TrustManager()};
 
 		//SSLContext sslContext = SSLContext.getInstance("SSL");
+/*		
+TrustManager[] trustAllCerts = new TrustManager[] { 
+    new X509TrustManager() {     
+        public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
+            return new X509Certificate[0];
+        } 
+        public void checkClientTrusted( 
+            java.security.cert.X509Certificate[] certs, String authType) {
+            } 
+        public void checkServerTrusted( 
+            java.security.cert.X509Certificate[] certs, String authType) {
+        }
+    } 
+}; 
+
+// Install the all-trusting trust manager
+try {
+    SSLContext sc = SSLContext.getInstance("SSL"); 
+    sc.init(null, trustAllCerts, new java.security.SecureRandom()); 
+    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+}catch(Exception mid){} 
+*/
+
+//System.setProperty("javax.net.ssl.trustStore","/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts");
+
+
+
 
 		//sslContext.init(null,tm,null);
 
-		//SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+		SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+
+
+
+
+
+
 		//sslContext.getServerSocketFactoy();
 
-		//SSLServerSocket serverSock = (SSLServerSocket) factory.createServerSocket(PORT);
+		SSLServerSocket serverSock = (SSLServerSocket) factory.createServerSocket(PORT);
 
 //		System.setProperty("javax.net.ssl.keyStore","za.store");
 		//System.setProperty("javax.net.ssl.keyStorePassword","password");
 
 
-ServerSocket serverSock = new ServerSocket(PORT);
+//ServerSocket serverSock = new ServerSocket(PORT);
 //		SSLServerSocketFactory factory =(SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 		//SSLServerSocketFactory.getDefault();
 
@@ -61,7 +95,7 @@ ServerSocket serverSock = new ServerSocket(PORT);
 		//serverSock.setEnabledProtocols(temp3);
 
 
-
+//serverSock.setEnabledCipherSuites(factory.getSupportedCipherSuites());
 
 
 
@@ -74,16 +108,17 @@ ServerSocket serverSock = new ServerSocket(PORT);
 
 		while(true){
 			try{
-				Socket client = serverSock.accept();
+				SSLSocket client = (SSLSocket) serverSock.accept();
 				client.setSoTimeout(10000);
-				HttpServer temp = new HttpServer(client,actLog,errLog);
+				client.setEnabledCipherSuites(factory.getSupportedCipherSuites());
+				//HttpServer temp = new HttpServer(client,actLog,errLog);
 				service.execute(temp);
 			}
 			catch(SocketTimeoutException x){
 				errLog.finer("Socket timed out: "+x);
 			}
 			catch(SSLHandshakeException z){
-				errLog.finer("SSL Handshake: "+z);
+				System.out.println("SSL Handshake: "+z);
 			}	
 		}
 	}

@@ -26,19 +26,19 @@ public class HttpServer implements Runnable{
 	static final String FILE_404 = "404.html";
 	static final File ROOT = new File("root/");
 
-	private Socket client;
+	private SSLSocket client;
 	private static Logger actLog;
 	private static Logger errLog;
 	private static boolean connection = false;
 
-	public HttpServer(Socket cl, Logger act, Logger err){
+	public HttpServer(SSLSocket cl, Logger act, Logger err){
 		client = cl;
 		actLog = act;
 		errLog = err;
 	}
 
 
-	public static void httpserver(Socket connect){
+	public static void httpserver(SSLSocket connect){
 		actLog.finer("Connected to Client: "+connect.toString());
 
 		//Initialize streams outside of try for catching errors
