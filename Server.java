@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.*;
@@ -14,9 +15,25 @@ import java.security.UnrecoverableKeyException;
 import java.security.KeyManagementException;
 
 public class Server{
+	private static ArrayList<InetAddress> blacklist = new ArrayList<InetAddress>();
+	private static long timeLast;
+	private static InetAddress prev;
 	static final int PORT = 8080; 
 
+	public static boolean isBlackListed(InetAddress check){
+		if(!blacklist.isEmpty()){
+			if (blacklist.contains(check)){
+				return true;
+			}	
+		}
+     		return false;
+   	}
+
 	public static void main(String[] args) throws IOException{
+		blacklist.add(InetAddress.getByName("www.myspace.com"));
+		Date time = new Date();
+ 		time.setTime(0);
+
 		//Set up the loggers
 		Logger actLog = Logger.getLogger("activity");
 		Logger errLog = Logger.getLogger("errors");
@@ -62,7 +79,7 @@ try {
 */
 
 
-
+/*
 
 SSLContext sc=null;//=SSLContext.getInstance("TLS");
 
@@ -75,7 +92,7 @@ char[] storepass = "mypassword".toCharArray();
 char[] keypass = "mypassword".toCharArray();
 String alias = "alias";
 FileInputStream fIn = new FileInputStream(keyStoreFilename);
-KeyStore keystore = KeyStore.getInstance("JKS");
+KeyStore keystore = KeyStore.getInstance("TLS");
 keystore.load(fIn, storepass);
 
 Certificate cert = keystore.getCertificate(alias);
@@ -100,26 +117,16 @@ catch(UnrecoverableKeyException o){}
 
 
 
+*/
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+		System.setProperty("javax.net.ssl.keyStore","~/Documents/github/httpServer/mykey.keystore");
+		System.setProperty("javax.net.ssl.keyStorePassword","mypassword");
 
 
 		//sslContext.init(null,tm,null);
 
-		SSLServerSocketFactory factory = (SSLServerSocketFactory) sc.getServerSocketFactory();
+		//SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault(); 
 
 
 
@@ -127,13 +134,13 @@ catch(UnrecoverableKeyException o){}
 
 		//sslContext.getServerSocketFactoy();
 
-		SSLServerSocket serverSock = (SSLServerSocket) factory.createServerSocket(PORT);
+		//SSLServerSocket serverSock = (SSLServerSocket) factory.createServerSocket(PORT);
 
 //		System.setProperty("javax.net.ssl.keyStore","za.store");
 		//System.setProperty("javax.net.ssl.keyStorePassword","password");
 
 
-//ServerSocket serverSock = new ServerSocket(PORT);
+ServerSocket serverSock = new ServerSocket(PORT);
 //		SSLServerSocketFactory factory =(SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 		//SSLServerSocketFactory.getDefault();
 
@@ -150,9 +157,7 @@ catch(UnrecoverableKeyException o){}
 		//serverSock.setEnabledProtocols(temp3);
 
 
-serverSock.setEnabledCipherSuites(factory.getSupportedCipherSuites());
-
-
+//serverSock.setEnabledCipherSuites(factory.getSupportedCipherSuites());
 
 
 		//ServerSocket serverSock = new ServerSocket(PORT);
@@ -163,18 +168,40 @@ serverSock.setEnabledCipherSuites(factory.getSupportedCipherSuites());
 
 		while(true){
 			try{
-				SSLSocket client = (SSLSocket) serverSock.accept();
-				client.setSoTimeout(10000);
-				client.setEnabledCipherSuites(factory.getSupportedCipherSuites());
-				HttpServer temp = new HttpServer(client,actLog,errLog);
-				service.execute(temp);
+				Socket client = serverSock.accept();
+				System.out.println("HELLO");
+				if (isBlackListed(client.getLocalAddress())){
+    					client.close();
+    				}
+  				long past = timeLast;
+    				timeLast = time.getTime();
+    				long currentTime = time.getTime();
+    				if ((currentTime < (past+10) ) && ((client.getLocalAddress()) == prev)) {
+					blacklist.add(client.getLocalAddress());
+					prev = client.getLocalAddress();
+    					client.close();
+    				}
+				else{
+    					prev = client.getLocalAddress();
+				}	
+			
+					client.setSoTimeout(10000);
+					//client.setEnabledCipherSuites(factory.getSupportedCipherSuites());
+					HttpServer temp = new HttpServer(client,actLog,errLog);
+					service.execute(temp);
+				
+			
 			}
 			catch(SocketTimeoutException x){
 				errLog.finer("Socket timed out: "+x);
 			}
 			catch(SSLHandshakeException z){
-				System.out.println("SSL Handshake: "+z);
+				errLog.finer("SSL Handshake: "+z);
 			}	
+			catch(NullPointerException a){
+				errLog.finer("NullPointerException: "+a);
+			}
 		}
 	}
+	
 }
