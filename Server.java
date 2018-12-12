@@ -7,6 +7,11 @@ import java.util.logging.*;
 import javax.net.ssl.*;
 import javax.net.*;
 import java.security.cert.*;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.KeyManagementException;
 
 public class Server{
 	static final int PORT = 8080; 
@@ -56,15 +61,65 @@ try {
 }catch(Exception mid){} 
 */
 
-//System.setProperty("javax.net.ssl.trustStore","/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts");
+
+
+
+SSLContext sc=null;//=SSLContext.getInstance("TLS");
+
+try{
+
+sc = SSLContext.getDefault();       //Instance("TLS");
+
+String keyStoreFilename = "mykey.keystore";
+char[] storepass = "mypassword".toCharArray();
+char[] keypass = "mypassword".toCharArray();
+String alias = "alias";
+FileInputStream fIn = new FileInputStream(keyStoreFilename);
+KeyStore keystore = KeyStore.getInstance("JKS");
+keystore.load(fIn, storepass);
+
+Certificate cert = keystore.getCertificate(alias);
+System.out.println(cert);
+
+KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+kmf.init(keystore,keypass);
+
+TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+tmf.init(keystore);
+
+
+//sc = SSLContext.getInstance("SSL"); 
+	sc.init(kmf.getKeyManagers(),tmf.getTrustManagers(),null); 
+}
+catch(NoSuchAlgorithmException e){}
+catch(KeyStoreException v){}
+catch(CertificateException i){}
+catch(IOException p){}
+catch(KeyManagementException u){}
+catch(UnrecoverableKeyException o){}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 		//sslContext.init(null,tm,null);
 
-		SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-
+		SSLServerSocketFactory factory = (SSLServerSocketFactory) sc.getServerSocketFactory();
 
 
 
@@ -95,7 +150,7 @@ try {
 		//serverSock.setEnabledProtocols(temp3);
 
 
-//serverSock.setEnabledCipherSuites(factory.getSupportedCipherSuites());
+serverSock.setEnabledCipherSuites(factory.getSupportedCipherSuites());
 
 
 
@@ -111,7 +166,7 @@ try {
 				SSLSocket client = (SSLSocket) serverSock.accept();
 				client.setSoTimeout(10000);
 				client.setEnabledCipherSuites(factory.getSupportedCipherSuites());
-				//HttpServer temp = new HttpServer(client,actLog,errLog);
+				HttpServer temp = new HttpServer(client,actLog,errLog);
 				service.execute(temp);
 			}
 			catch(SocketTimeoutException x){
