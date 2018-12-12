@@ -29,11 +29,7 @@ public class Server{
 
 		//Create a new server socket
 
-		//SSLServerSocketFactory factory = context.getServerSocketFactory(); SSLServerSocket serverSock = (SSLServerSocket) factory.createServerSocket(PORT); String[] supported = server.getSupportedCipherSuites(); String[] anonCipherSuitesSupported = new String[supported.length]; int numAnonCipherSuitesSupported = 0; for (int i = 0; i < supported.length; i++) { if (supported[i].indexOf("_anon_") > 0) { anonCipherSuitesSupported[numAnonCipherSuitesSupported++] = supported[i]; } } String[] oldEnabled = server.getEnabledCipherSuites(); String[] newEnabled = new String[oldEnabled.length + numAnonCipherSuitesSupported]; System.arraycopy(oldEnabled, 0, newEnabled, 0, oldEnabled.length); System.arraycopy(anonCipherSuitesSupported, 0, newEnabled, oldEnabled.length, numAnonCipherSuitesSupported); server.setEnabledCipherSuites(newEnabled);
-
-
 		//TrustManager[] tm = {new MyX509TrustManager()};
-
 
 		//SSLContext sslContext = SSLContext.getInstance("SSL");
 
@@ -44,18 +40,19 @@ public class Server{
 
 		//SSLServerSocket serverSock = (SSLServerSocket) factory.createServerSocket(PORT);
 
+//		System.setProperty("javax.net.ssl.keyStore","za.store");
+		//System.setProperty("javax.net.ssl.keyStorePassword","password");
 
 
-
-
-		ServerSocketFactory factory = SSLServerSocketFactory.getDefault();
+ServerSocket serverSock = new ServerSocket(PORT);
+//		SSLServerSocketFactory factory =(SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
 		//SSLServerSocketFactory.getDefault();
 
 		//String[] temp2 = factory.getSupportedCipherSuites();
 
 		//String[] temp3 = factory.getDefaultCipherSuites();
 
-		ServerSocket serverSock = factory.createServerSocket(PORT);
+//		SSLServerSocket serverSock =(SSLServerSocket) factory.createServerSocket(PORT);
 
 		//serverSock.setEnabledCipherSuites(temp2);
 
@@ -84,6 +81,9 @@ public class Server{
 			}
 			catch(SocketTimeoutException x){
 				errLog.finer("Socket timed out: "+x);
+			}
+			catch(SSLHandshakeException z){
+				errLog.finer("SSL Handshake: "+z);
 			}	
 		}
 	}

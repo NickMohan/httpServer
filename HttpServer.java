@@ -174,12 +174,11 @@ public class HttpServer implements Runnable{
 				actLog.finer("OPTIONS Request recieved");
 				
 				out.println("HTTP/1.1 200 OK");
-				out.println("Allow: GET, HEAD, OPTIONS");
+				out.println("Allow: GET, HEAD, OPTIONS, POST, PUT, DELETE");
 				out.println("Server: TEST");
 				out.println("Date: "+new Date());
 				out.println("Content-length: 0");
 				out.print("\r\n\r\n");
-				//out.println();
 				out.flush();
 				actLog.finer("OPTIONS Request Returned");
 			}
