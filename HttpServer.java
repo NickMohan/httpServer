@@ -94,8 +94,6 @@ public class HttpServer implements Runnable{
 				}
 			}
 
-			//System.out.println(connectKeepAlive+"  "+contentType+"  "+contentLength);
-
 			connection = (connectKeepAlive.equalsIgnoreCase("Keep-Alive")) ? true : false;
 
 			if(httpRequestType.equalsIgnoreCase("GET") || httpRequestType.equalsIgnoreCase("HEAD")){
@@ -193,17 +191,20 @@ public class HttpServer implements Runnable{
 		catch(NullPointerException y){errLog.finer("NullPointerException: "+y);}
 		catch(Exception e){errLog.finer("Exception: "+ e);}
 		finally{
-			try{
-			//	if(!connection){
+			try {
+				if(!connection) {
 					in.close();
 					out.close();
 					fileOut.close();
 					connect.close();
-					System.out.println("Closed Connections");
-			//	}
-			//	else{
-			//		System.out.println("Connections left open");
-			//	}
+					System.out.println("Closed connection"); 
+				}
+				else if(connection) {
+					connect.setKeepAlive(true);
+					System.out.println("Client keep alive: " + connect.getKeepAlive());
+					connect.setSoTimeout(5000);
+					System.out.println("So_TimeOut set: " + connect.getSoTimeout());
+				}
 			}
 			catch(IOException x){errLog.finer("IOException: "+x);}
 		}
@@ -280,57 +281,4 @@ public class HttpServer implements Runnable{
 	public void run(){
 		httpserver(client);
 	}
-
-
 }
-
-
-
-
-				//This should send the request body to the script for processing and the return the response
-				//to the client
-
-				/*
-				out.println("HTTP/1.1 200 OK");
-				out.println("Server: TEST");
-				out.println("Date: "+new Date());
-				out.println("Content-length: "); 		//FILL OUT
-				out.println("Content-Type: "); 			//FILL OUT
-				out.print("\r\n\r\n");
-				//out.println();
-				out.flush();
-
-				//This should return the response in the body for the POST request
-				
-				//fileOut.write(fileData,0,fileLength);
-				//fileOut.flush();
-				//out.flush();
-				*/
-
-//				if(fileRequested.endsWith("/")){
-//					fileRequested += DEFAULT_FILE;
-//				}	
-				
-//				File file = new File(ROOT, fileRequested);
-//				int fileLength = (int) file.length();
-//				String fileType = getContentType(fileRequested);
-
-//				System.out.println(fileLength+"\t"+fileType);
-
-//				byte[] fileData = fileDataToBytes(file,fileLength);
-
-				//for(byte x : fileData){System.out.print(x+" ");}
-
-				//out.println("HTTP/1.1 200 OK");
-				//out.println("Server: TEST");
-				//out.println("Date: "+new Date());
-//				out.println("Content-type:" + fileType);
-//				out.println("Content-length: "+fileLength);
-				//out.print("\r\n\r\n");
-				//out.println();
-				//out.flush();
-
-				//fileOut.write(fileData,0,fileLength);
-				//fileOut.flush();
-
-
