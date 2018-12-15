@@ -11,14 +11,10 @@ you want to have the server host for you here.
 |-activity.log
 |-root
 | |-index.html
-| |-authentication.html
 | |-404.html
 
-The index.html file is used for testing the GET POST and HEAD and can be
+The index.html file is for user authentication testing and can be 
 accessed at localhost:8080
-
-The authentication.html file is for user authentication testing and can be 
-accessed at localhost:8080/authentication.html
 
 To run the server just compile the Server.java file and then run it.
 The server is set to run on port 8080 and go to localhost:8080 on any
@@ -27,3 +23,15 @@ versions of java below:
  Java Compiler : 1.8.0_191
  Java Virtual Machine : 1.8.0_191
 
+To test the server we used the command line curl command. Below is
+the linux bash commands for testing each of the difference HTTP 
+request methods
+
+GET
+curl -v http://localhost:8080
+
+POST
+curl -d "data=test" http://localhost:8080
+
+HEAD
+curl 

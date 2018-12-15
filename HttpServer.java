@@ -4,21 +4,6 @@ import java.util.*;
 import java.util.logging.*;
 import javax.net.ssl.*;
 
-//---------------------------
-//			TODO
-//---------------------------
-//Logging 				[X]
-//POST					[]
-//HEAD 					[X]							
-//Better MIME Types 			[]
-//Keep-Alive Header    		        []
-//Add Timeout for Files that dont show  []
-//
-//Read more into header(keep alive, cookies?)
-//Compression?(GZIP)
-//SSL?
-//Authentication?(User and Password)?
-//Other Things?
 
 
 public class HttpServer implements Runnable{
